@@ -4,15 +4,14 @@ The repository includes a GitHub Actions workflow that builds and publishes mult
 
 ## Required GitHub Secrets
 
-Create these repository secrets in GitHub:
+Create this repository secret in GitHub:
 
-- `DOCKERHUB_USERNAME`: Docker Hub username that owns the target repository.
 - `DOCKERHUB_TOKEN`: Docker Hub access token with permission to push images.
 
 The workflow publishes to:
 
 ```text
-docker.io/DOCKERHUB_USERNAME/truenas-ncdu
+docker.io/joanmarcriera/truenas-ncdu
 ```
 
 ## Tags
@@ -35,6 +34,6 @@ git push origin v0.1.0
 docker login
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest \
+  -t docker.io/joanmarcriera/truenas-ncdu:latest \
   --push .
 ```

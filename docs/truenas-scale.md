@@ -6,7 +6,7 @@ This image is intended for one-off disk-usage inspection on TrueNAS SCALE system
 
 ## Recommended One-Off SSH Command
 
-Replace `YOUR_DOCKERHUB_USERNAME` after the image has been published:
+Use the published Docker Hub image:
 
 ```bash
 docker run --rm -it \
@@ -16,7 +16,7 @@ docker run --rm -it \
   --cap-drop ALL \
   --security-opt no-new-privileges \
   -v /mnt:/mnt:ro \
-  docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest
+  docker.io/joanmarcriera/truenas-ncdu:latest
 ```
 
 To scan a specific pool or dataset:
@@ -29,7 +29,7 @@ docker run --rm -it \
   --cap-drop ALL \
   --security-opt no-new-privileges \
   -v /mnt:/mnt:ro \
-  docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest \
+  docker.io/joanmarcriera/truenas-ncdu:latest \
   /mnt/tank/media
 ```
 
@@ -68,14 +68,14 @@ Stay on one filesystem is enabled by default through `ncdu -x`. Disable it only 
 ```bash
 docker run --rm -it -v /mnt:/mnt:ro \
   -e NCDU_ONE_FILESYSTEM=false \
-  docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest
+  docker.io/joanmarcriera/truenas-ncdu:latest
 ```
 
 Pass normal `ncdu` options after the scan path:
 
 ```bash
 docker run --rm -it -v /mnt:/mnt:ro \
-  docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest \
+  docker.io/joanmarcriera/truenas-ncdu:latest \
   /mnt/tank/media --exclude .zfs
 ```
 

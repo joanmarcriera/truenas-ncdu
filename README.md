@@ -15,7 +15,7 @@ TrueNAS SCALE does not ship `ncdu` on the host appliance. This repository packag
 
 ## Quick Use
 
-After publishing the image to Docker Hub, replace `YOUR_DOCKERHUB_USERNAME` and run this from a TrueNAS SCALE shell:
+Run this from a TrueNAS SCALE shell:
 
 ```bash
 docker run --rm -it \
@@ -25,7 +25,7 @@ docker run --rm -it \
   --cap-drop ALL \
   --security-opt no-new-privileges \
   -v /mnt:/mnt:ro \
-  docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest
+  docker.io/joanmarcriera/truenas-ncdu:latest
 ```
 
 Scan one dataset:
@@ -38,7 +38,7 @@ docker run --rm -it \
   --cap-drop ALL \
   --security-opt no-new-privileges \
   -v /mnt:/mnt:ro \
-  docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest \
+  docker.io/joanmarcriera/truenas-ncdu:latest \
   /mnt/tank/media
 ```
 
@@ -74,9 +74,8 @@ See [docs/truenas-scale.md](docs/truenas-scale.md) for the detailed TrueNAS note
 
 The repository includes [`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml).
 
-Add these GitHub repository secrets:
+Add this GitHub repository secret:
 
-- `DOCKERHUB_USERNAME`
 - `DOCKERHUB_TOKEN`
 
 Then run the workflow manually, or tag a release:
@@ -103,9 +102,9 @@ Environment variables:
 Examples:
 
 ```bash
-docker run --rm -it -v /mnt:/mnt:ro docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest /mnt/tank/media --exclude .zfs
-docker run --rm -it -v /mnt:/mnt:ro -e NCDU_ONE_FILESYSTEM=false docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest
-docker run --rm -it -v /mnt:/mnt:ro docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest -- sh
+docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest /mnt/tank/media --exclude .zfs
+docker run --rm -it -v /mnt:/mnt:ro -e NCDU_ONE_FILESYSTEM=false docker.io/joanmarcriera/truenas-ncdu:latest
+docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest -- sh
 ```
 
 ## Development

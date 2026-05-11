@@ -1,6 +1,6 @@
 services:
   truenas-ncdu:
-    image: docker.io/YOUR_DOCKERHUB_USERNAME/truenas-ncdu:latest
+    image: docker.io/joanmarcriera/truenas-ncdu:latest
     container_name: truenas-ncdu
     command: ["--", "sleep", "infinity"]
     stdin_open: true
