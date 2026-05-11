@@ -79,10 +79,11 @@ Pull Policy: Only pull image if not present on host
 6. In **Container Configuration**, leave **Entrypoint** empty and add these **Command** entries, one value per field:
 
 ```text
---
 sleep
 infinity
 ```
+
+Do not add `--` or `---` as a command entry.
 
 This keeps the app running as a small toolbox container. You then open a shell into the app and run `truenas-ncdu` interactively.
 
@@ -141,7 +142,7 @@ services:
   truenas-ncdu:
     image: docker.io/joanmarcriera/truenas-ncdu:latest
     container_name: truenas-ncdu
-    command: ["--", "sleep", "infinity"]
+    command: ["sleep", "infinity"]
     stdin_open: true
     tty: true
     network_mode: none
@@ -206,7 +207,7 @@ Examples:
 ```bash
 docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest /mnt/tank/media --exclude .zfs
 docker run --rm -it -v /mnt:/mnt:ro -e NCDU_ONE_FILESYSTEM=false docker.io/joanmarcriera/truenas-ncdu:latest
-docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest -- sh
+docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest sh
 ```
 
 ## Development

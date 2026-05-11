@@ -8,7 +8,7 @@ truenas-ncdu - ncdu in a small container for TrueNAS SCALE
 Usage:
   truenas-ncdu [SCAN_PATH] [NCDU_OPTIONS...]
   truenas-ncdu --help-container
-  truenas-ncdu -- COMMAND [ARGS...]
+  truenas-ncdu COMMAND [ARGS...]
 
 Environment:
   NCDU_PATH=/mnt              Default scan path when SCAN_PATH is omitted.
@@ -18,7 +18,8 @@ Environment:
 Examples:
   truenas-ncdu
   truenas-ncdu /mnt/tank/media --exclude .zfs
-  truenas-ncdu -- sh
+  truenas-ncdu sleep infinity
+  truenas-ncdu sh
 HELP
 }
 
@@ -32,7 +33,7 @@ case "${1:-}" in
     shift
     exec "$@"
     ;;
-  sh|/bin/sh|bash|/bin/bash|ncdu|/usr/bin/ncdu)
+  sh|/bin/sh|bash|/bin/bash|sleep|/bin/sleep|tail|/usr/bin/tail|cat|/bin/cat|ncdu|/usr/bin/ncdu)
     exec "$@"
     ;;
 esac

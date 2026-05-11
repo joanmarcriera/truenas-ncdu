@@ -42,7 +42,7 @@ For TrueNAS SCALE 24.10 or later, the Apps screen supports third-party Docker im
 The example keeps the container alive with:
 
 ```yaml
-command: ["--", "sleep", "infinity"]
+command: ["sleep", "infinity"]
 ```
 
 After the app starts, open a shell for the `truenas-ncdu` container and run:

@@ -2,7 +2,7 @@ services:
   truenas-ncdu:
     image: docker.io/joanmarcriera/truenas-ncdu:latest
     container_name: truenas-ncdu
-    command: ["--", "sleep", "infinity"]
+    command: ["sleep", "infinity"]
     stdin_open: true
     tty: true
     network_mode: none
