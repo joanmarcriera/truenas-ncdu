@@ -16,10 +16,12 @@ docker.io/joanmarcriera/truenas-ncdu
 
 ## Tags
 
-Run the workflow manually or push a semver tag. The publish workflow creates:
+Run the workflow manually. The publish workflow creates:
 
-- `latest` for manual runs and semver tag pushes.
-- `vX.Y.Z`, `X.Y`, and `git-<sha>` tags for semver Git tags.
+- `latest`.
+- `git-<sha>`.
+
+For semver image tags, build and push locally or update the workflow input handling before release.
 
 To publish a release:
 

@@ -187,7 +187,7 @@ Add this GitHub repository secret:
 
 - `DOCKERHUB_TOKEN`
 
-Then run the workflow manually, or tag a release:
+Then run the workflow manually. To tag a release in git:
 
 ```bash
 git tag v0.1.0
