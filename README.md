@@ -58,17 +58,119 @@ docker build -t truenas-ncdu:dev .
 docker run --rm -it -v /mnt:/mnt:ro truenas-ncdu:dev
 ```
 
-## TrueNAS SCALE Custom App
+## TrueNAS SCALE App Setup
 
-Current TrueNAS SCALE documentation describes two Custom App paths for third-party Docker images: a guided Custom App screen and an advanced YAML/Compose editor. Use [`examples/compose.truenas.yaml`](examples/compose.truenas.yaml) as the starting YAML.
+Use this path when you want `ncdu` available as a TrueNAS app rather than typing a `docker run` command over SSH.
 
-The compose example runs the container as a sleeping toolbox. After it starts, open a shell into the app container and run:
+In the TrueNAS SCALE web UI:
 
-```bash
-truenas-ncdu /mnt/tank/media
+1. Open **Apps**.
+2. Click **Discover Apps**.
+3. Click **Custom App**.
+4. Set **Application Name** to `truenas-ncdu`.
+5. In **Image Configuration**, set:
+
+```text
+Repository: joanmarcriera/truenas-ncdu
+Tag: latest
+Pull Policy: Only pull image if not present on host
 ```
 
-See [docs/truenas-scale.md](docs/truenas-scale.md) for the detailed TrueNAS notes, including permissions and interactive terminal trade-offs.
+6. In **Container Configuration**, leave **Entrypoint** empty and add these **Command** entries, one value per field:
+
+```text
+--
+sleep
+infinity
+```
+
+This keeps the app running as a small toolbox container. You then open a shell into the app and run `truenas-ncdu` interactively.
+
+7. Still in **Container Configuration**, enable:
+
+```text
+TTY: enabled
+Stdin: enabled
+Restart Policy: Unless Stopped
+```
+
+8. Add environment variables:
+
+```text
+NCDU_PATH=/mnt/BigDisk
+NCDU_ONE_FILESYSTEM=true
+```
+
+Change `NCDU_PATH` if you mount a different dataset path.
+
+9. In **Network Configuration**, do not add ports. `ncdu` has no web UI.
+10. In **Storage Configuration**, click **Add** and choose **Host Path**.
+11. Select only the dataset or pool path you want `ncdu` to read. For the BigDisk scenario:
+
+```text
+Type: Host Path
+Host Path: /mnt/BigDisk
+Mount Path: /mnt/BigDisk
+Read Only: enabled
+```
+
+Use read-only mounts for normal inspection. If you want to scan multiple datasets, add one Host Path entry per dataset, or mount `/mnt` to `/mnt` read-only if you deliberately want broad visibility.
+
+12. Save the app.
+13. After it starts, open the app shell from the installed app workload options.
+14. Run:
+
+```bash
+truenas-ncdu
+```
+
+Or scan a subdirectory:
+
+```bash
+truenas-ncdu /mnt/BigDisk/media
+```
+
+If the app shell shows permission errors, check the dataset ACL for the mounted path and make sure the app user can read and traverse the dataset. The mount should still stay read-only unless you intentionally want delete support from inside `ncdu`.
+
+## TrueNAS YAML for BigDisk
+
+TrueNAS also supports installing custom apps from YAML. Go to **Apps > Discover Apps**, open the menu at the top right, choose **Install via YAML**, name the app `truenas-ncdu`, and paste this Compose YAML:
+
+```yaml
+services:
+  truenas-ncdu:
+    image: docker.io/joanmarcriera/truenas-ncdu:latest
+    container_name: truenas-ncdu
+    command: ["--", "sleep", "infinity"]
+    stdin_open: true
+    tty: true
+    network_mode: none
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    environment:
+      NCDU_PATH: /mnt/BigDisk
+      NCDU_ONE_FILESYSTEM: "true"
+    volumes:
+      - type: bind
+        source: /mnt/BigDisk
+        target: /mnt/BigDisk
+        read_only: true
+```
+
+This same YAML is available at [`examples/compose.bigdisk.yaml`](examples/compose.bigdisk.yaml). The generic `/mnt` example remains at [`examples/compose.truenas.yaml`](examples/compose.truenas.yaml).
+
+After the app starts, open a shell into the container and run:
+
+```bash
+truenas-ncdu
+```
+
+See [docs/truenas-scale.md](docs/truenas-scale.md) for extra TrueNAS notes, including permissions and interactive terminal trade-offs.
 
 ## Publish to Docker Hub
 
