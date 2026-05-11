@@ -2,7 +2,7 @@
 
 This image is intended for one-off disk-usage inspection on TrueNAS SCALE systems that do not have `ncdu` installed on the host.
 
-`ncdu` is interactive, so the best experience is usually an SSH session to the TrueNAS host followed by `docker run -it`. The TrueNAS Apps UI/YAML route is useful when you prefer a managed app container that stays stopped or sleeping until you open a shell into it.
+`ncdu` is interactive. Use the SSH command path when you are already in a terminal, or use the TrueNAS App/YAML path to run a browser terminal on port `7681`.
 
 ## Recommended One-Off SSH Command
 
@@ -39,19 +39,21 @@ The container mount is read-only. `ncdu` can inspect and navigate usage, but it 
 
 For TrueNAS SCALE 24.10 or later, the Apps screen supports third-party Docker images through Custom App and YAML/Compose flows. Use `examples/compose.truenas.yaml` as the starting point.
 
-The example keeps the container alive with:
+The example starts browser terminal mode with:
 
 ```yaml
-command: ["sleep", "infinity"]
+command: ["web"]
+ports:
+  - "7681:7681"
 ```
 
-After the app starts, open a shell for the `truenas-ncdu` container and run:
+The container starts a detached `tmux` session running `ncdu`, then serves it through `ttyd`. Open:
 
-```bash
-truenas-ncdu /mnt/tank/media
+```text
+http://<truenas-ip>:7681
 ```
 
-If you want the TUI to start immediately instead of keeping a sleeping helper container, remove the `command` line. That only works well when your execution path attaches an interactive terminal.
+Set `TTYD_PASSWORD` in the app environment before exposing the port on a shared network.
 
 ## Permissions
 

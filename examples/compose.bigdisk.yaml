@@ -1,11 +1,8 @@
 services:
   truenas-ncdu:
-    image: docker.io/joanmarcriera/truenas-ncdu:latest
+    image: docker.io/joanmarcriera/truenas-ncdu:0.2.0
     container_name: truenas-ncdu
-    command: ["sleep", "infinity"]
-    stdin_open: true
-    tty: true
-    network_mode: none
+    command: ["web"]
     read_only: true
     cap_drop:
       - ALL
@@ -16,6 +13,10 @@ services:
     environment:
       NCDU_PATH: /mnt/BigDisk
       NCDU_ONE_FILESYSTEM: "true"
+      TTYD_USER: admin
+      TTYD_PASSWORD: change-this-password
+    ports:
+      - "7681:7681"
     volumes:
       - type: bind
         source: /mnt/BigDisk
