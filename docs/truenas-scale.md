@@ -16,7 +16,8 @@ docker run --rm -it \
   --cap-drop ALL \
   --security-opt no-new-privileges \
   -v /mnt:/mnt:ro \
-  docker.io/joanmarcriera/truenas-ncdu:latest
+  docker.io/joanmarcriera/truenas-ncdu:latest \
+  /mnt
 ```
 
 To scan a specific pool or dataset:
@@ -39,10 +40,9 @@ The container mount is read-only. `ncdu` can inspect and navigate usage, but it 
 
 For TrueNAS SCALE 24.10 or later, the Apps screen supports third-party Docker images through Custom App and YAML/Compose flows. Use `examples/compose.truenas.yaml` as the starting point.
 
-The example starts browser terminal mode with:
+The image defaults to browser terminal mode. The Compose examples do not need a `command` override:
 
 ```yaml
-command: ["web"]
 ports:
   - "7681:7681"
 ```
@@ -70,7 +70,8 @@ Stay on one filesystem is enabled by default through `ncdu -x`. Disable it only 
 ```bash
 docker run --rm -it -v /mnt:/mnt:ro \
   -e NCDU_ONE_FILESYSTEM=false \
-  docker.io/joanmarcriera/truenas-ncdu:latest
+  docker.io/joanmarcriera/truenas-ncdu:latest \
+  /mnt
 ```
 
 Pass normal `ncdu` options after the scan path:

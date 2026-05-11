@@ -5,6 +5,7 @@ ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 
 sh -n "$ROOT_DIR/entrypoint.sh"
 sh "$ROOT_DIR/tests/entrypoint_test.sh"
+sh "$ROOT_DIR/tests/dockerfile_contract_test.sh"
 
 if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   DOCKER_PLATFORM=${DOCKER_PLATFORM:-linux/amd64}

@@ -87,6 +87,11 @@ test_command_passthrough_allows_shell_access() {
   [ "$output" = "shell-ok" ] || fail "expected shell passthrough, got [$output]"
 }
 
+test_version_reports_environment_version() {
+  output=$(TRUENAS_NCDU_VERSION=9.9.9 "$ENTRYPOINT" --version)
+  [ "$output" = "9.9.9" ] || fail "expected version output, got [$output]"
+}
+
 test_sleep_command_passthrough_supports_truenas_command_fields() {
   "$ENTRYPOINT" sleep 0 || fail "expected sleep command passthrough"
 }
@@ -124,6 +129,7 @@ test_default_scans_mnt_with_one_filesystem_flag
 test_path_argument_overrides_default_path_and_preserves_options
 test_one_filesystem_flag_can_be_disabled
 test_command_passthrough_allows_shell_access
+test_version_reports_environment_version
 test_sleep_command_passthrough_supports_truenas_command_fields
 test_web_mode_starts_tmux_session_and_ttyd
 test_missing_scan_path_fails_before_ncdu_runs

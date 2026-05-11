@@ -72,6 +72,11 @@ if [ "${1:-}" = "--help-container" ] || [ "${1:-}" = "help" ]; then
   exit 0
 fi
 
+if [ "${1:-}" = "--version" ] || [ "${1:-}" = "version" ]; then
+  printf '%s\n' "${TRUENAS_NCDU_VERSION:-unknown}"
+  exit 0
+fi
+
 if [ "${1:-}" = "web" ]; then
   start_web_tui
 fi

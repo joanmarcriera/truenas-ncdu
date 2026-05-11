@@ -26,7 +26,8 @@ docker run --rm -it \
   --cap-drop ALL \
   --security-opt no-new-privileges \
   -v /mnt:/mnt:ro \
-  docker.io/joanmarcriera/truenas-ncdu:latest
+  docker.io/joanmarcriera/truenas-ncdu:latest \
+  /mnt
 ```
 
 Scan one dataset:
@@ -73,17 +74,13 @@ In the TrueNAS SCALE web UI:
 
 ```text
 Repository: joanmarcriera/truenas-ncdu
-Tag: 0.2.0
+Tag: 0.2.1
 Pull Policy: Always pull an image even if it is present on the host
 ```
 
-6. In **Container Configuration**, leave **Entrypoint** empty and add this **Command** entry:
+6. In **Container Configuration**, leave **Entrypoint** empty and leave **Command** empty.
 
-```text
-web
-```
-
-This starts the browser terminal server when the app boots.
+The image defaults to web mode, so the browser terminal server starts when the app boots.
 
 7. Set:
 
@@ -149,9 +146,8 @@ TrueNAS also supports installing custom apps from YAML. Go to **Apps > Discover 
 ```yaml
 services:
   truenas-ncdu:
-    image: docker.io/joanmarcriera/truenas-ncdu:0.2.0
+    image: docker.io/joanmarcriera/truenas-ncdu:0.2.1
     container_name: truenas-ncdu
-    command: ["web"]
     read_only: true
     cap_drop:
       - ALL
@@ -212,9 +208,10 @@ Examples:
 
 ```bash
 docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest /mnt/tank/media --exclude .zfs
-docker run --rm -it -v /mnt:/mnt:ro -e NCDU_ONE_FILESYSTEM=false docker.io/joanmarcriera/truenas-ncdu:latest
+docker run --rm -it -v /mnt:/mnt:ro -e NCDU_ONE_FILESYSTEM=false docker.io/joanmarcriera/truenas-ncdu:latest /mnt
 docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest sh
-docker run --rm -p 7681:7681 -v /mnt:/mnt:ro -e TTYD_PASSWORD=change-me docker.io/joanmarcriera/truenas-ncdu:latest web
+docker run --rm docker.io/joanmarcriera/truenas-ncdu:latest --version
+docker run --rm -p 7681:7681 -v /mnt:/mnt:ro -e TTYD_PASSWORD=change-me docker.io/joanmarcriera/truenas-ncdu:latest
 ```
 
 ## Development

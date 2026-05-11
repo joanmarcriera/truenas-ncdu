@@ -18,7 +18,7 @@ run:
 		--cap-drop ALL \
 		--security-opt no-new-privileges \
 		-v $(SCAN_PATH):/mnt:ro \
-		$(IMAGE):$(TAG)
+		$(IMAGE):$(TAG) /mnt
 
 web:
 	docker run --rm -it \
@@ -29,7 +29,7 @@ web:
 		-p 7681:7681 \
 		-e TTYD_PASSWORD=change-me \
 		-v $(SCAN_PATH):/mnt:ro \
-		$(IMAGE):$(TAG) web
+		$(IMAGE):$(TAG)
 
 shell:
 	docker run --rm -it \
