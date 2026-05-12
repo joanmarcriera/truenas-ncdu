@@ -9,6 +9,7 @@ TrueNAS SCALE does not ship `ncdu` on the host appliance. This repository packag
 - Alpine-based container with `ncdu` and `tini`.
 - Safe default scan path: `/mnt`.
 - `ncdu -x` enabled by default to avoid crossing filesystem boundaries.
+- `.zfs` snapshot directories excluded by default so ZFS snapshots do not inflate normal folder totals.
 - Browser terminal mode through `ttyd`, backed by a persistent `tmux` session.
 - Read-only mount examples for TrueNAS datasets.
 - GitHub Actions CI and Docker Hub publishing workflow.
@@ -74,7 +75,7 @@ In the TrueNAS SCALE web UI:
 
 ```text
 Repository: joanmarcriera/truenas-ncdu
-Tag: 0.2.1
+Tag: 0.2.2
 Pull Policy: Always pull an image even if it is present on the host
 ```
 
@@ -95,11 +96,12 @@ TTY and Stdin are not required for web mode.
 ```text
 NCDU_PATH=/mnt/BigDisk
 NCDU_ONE_FILESYSTEM=true
+NCDU_EXCLUDE_ZFS=true
 TTYD_USER=admin
 TTYD_PASSWORD=<choose-a-password>
 ```
 
-Change `NCDU_PATH` if you mount a different dataset path.
+Change `NCDU_PATH` if you mount a different dataset path. Keep `NCDU_EXCLUDE_ZFS=true` for normal scans; set it to `false` only when you deliberately want to inspect ZFS snapshot contents under `.zfs/snapshot`.
 
 9. In **Network Configuration**, add a TCP port:
 
@@ -146,7 +148,7 @@ TrueNAS also supports installing custom apps from YAML. Go to **Apps > Discover 
 ```yaml
 services:
   truenas-ncdu:
-    image: docker.io/joanmarcriera/truenas-ncdu:0.2.1
+    image: docker.io/joanmarcriera/truenas-ncdu:0.2.2
     container_name: truenas-ncdu
     read_only: true
     cap_drop:
@@ -158,6 +160,7 @@ services:
     environment:
       NCDU_PATH: /mnt/BigDisk
       NCDU_ONE_FILESYSTEM: "true"
+      NCDU_EXCLUDE_ZFS: "true"
       TTYD_USER: admin
       TTYD_PASSWORD: change-this-password
     ports:
@@ -174,6 +177,8 @@ This same YAML is available at [`examples/compose.bigdisk.yaml`](examples/compos
 After the app starts, open `http://<truenas-ip>:7681` and log in with `admin` plus the password you configured.
 
 See [docs/truenas-scale.md](docs/truenas-scale.md) for extra TrueNAS notes, including permissions and interactive terminal trade-offs.
+
+If Time Machine or other ZFS-backed datasets look impossibly large, see [docs/time-machine-zfs-snapshots.md](docs/time-machine-zfs-snapshots.md). The usual cause is `ncdu` counting visible `.zfs/snapshot` trees, not live files.
 
 ## Publish to Docker Hub
 
@@ -202,13 +207,15 @@ Environment variables:
 
 - `NCDU_PATH`: default scan path. Defaults to `/mnt`.
 - `NCDU_ONE_FILESYSTEM`: `true` or `false`. Defaults to `true`.
+- `NCDU_EXCLUDE_ZFS`: `true` or `false`. Defaults to `true`; excludes `.zfs` snapshot directories.
 - `NCDU_BIN`: override the binary, mainly for tests.
 
 Examples:
 
 ```bash
-docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest /mnt/tank/media --exclude .zfs
+docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest /mnt/tank/media
 docker run --rm -it -v /mnt:/mnt:ro -e NCDU_ONE_FILESYSTEM=false docker.io/joanmarcriera/truenas-ncdu:latest /mnt
+docker run --rm -it -v /mnt:/mnt:ro -e NCDU_EXCLUDE_ZFS=false docker.io/joanmarcriera/truenas-ncdu:latest /mnt/tank/media
 docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest sh
 docker run --rm docker.io/joanmarcriera/truenas-ncdu:latest --version
 docker run --rm -p 7681:7681 -v /mnt:/mnt:ro -e TTYD_PASSWORD=change-me docker.io/joanmarcriera/truenas-ncdu:latest

@@ -1,6 +1,6 @@
 services:
   truenas-ncdu:
-    image: docker.io/joanmarcriera/truenas-ncdu:0.2.1
+    image: docker.io/joanmarcriera/truenas-ncdu:0.2.2
     container_name: truenas-ncdu
     read_only: true
     cap_drop:
@@ -12,6 +12,7 @@ services:
     environment:
       NCDU_PATH: /mnt/BigDisk
       NCDU_ONE_FILESYSTEM: "true"
+      NCDU_EXCLUDE_ZFS: "true"
       TTYD_USER: admin
       TTYD_PASSWORD: change-this-password
     ports:

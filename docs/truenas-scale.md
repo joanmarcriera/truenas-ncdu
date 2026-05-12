@@ -55,6 +55,18 @@ http://<truenas-ip>:7681
 
 Set `TTYD_PASSWORD` in the app environment before exposing the port on a shared network.
 
+For normal storage inspection, keep `NCDU_EXCLUDE_ZFS=true`. ZFS exposes snapshots through `.zfs/snapshot` when snapshot browsing is visible, and disk-usage tools can otherwise add those historical views to the live dataset total.
+
+## Web Terminal Screenshots
+
+Initial browser TUI scan:
+
+![TrueNAS ncdu web TUI initial scan](truenas-ncdu-web-tui-now.png)
+
+Follow-up scan after the web TUI kept running:
+
+![TrueNAS ncdu web TUI follow-up scan](truenas-ncdu-web-tui-after-10m.png)
+
 ## Permissions
 
 The image runs as root inside the container because NAS datasets often have mixed ownership and ACLs. Keep the host mount read-only unless you intentionally want delete support.
@@ -79,7 +91,16 @@ Pass normal `ncdu` options after the scan path:
 ```bash
 docker run --rm -it -v /mnt:/mnt:ro \
   docker.io/joanmarcriera/truenas-ncdu:latest \
-  /mnt/tank/media --exclude .zfs
+  /mnt/tank/media --color dark
+```
+
+To inspect `.zfs/snapshot` itself, opt in explicitly:
+
+```bash
+docker run --rm -it -v /mnt:/mnt:ro \
+  -e NCDU_EXCLUDE_ZFS=false \
+  docker.io/joanmarcriera/truenas-ncdu:latest \
+  /mnt/tank/media
 ```
 
 ## Official TrueNAS References

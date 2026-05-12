@@ -54,7 +54,7 @@ test_default_scans_mnt_with_one_filesystem_flag() {
 
   NCDU_BIN="$tmp/ncdu-stub" NCDU_STUB_OUTPUT="$tmp/args" NCDU_PATH="$tmp/scan" "$ENTRYPOINT"
 
-  assert_file_equals "-x $tmp/scan" "$tmp/args"
+  assert_file_equals "-x --exclude .zfs $tmp/scan" "$tmp/args"
   rm -rf "$tmp"
 }
 
@@ -64,7 +64,7 @@ test_path_argument_overrides_default_path_and_preserves_options() {
   make_ncdu_stub "$tmp"
 
   NCDU_BIN="$tmp/ncdu-stub" NCDU_STUB_OUTPUT="$tmp/args" NCDU_PATH="$tmp/default" \
-    "$ENTRYPOINT" "$tmp/media" --exclude .zfs --color dark
+    "$ENTRYPOINT" "$tmp/media" --color dark
 
   assert_file_equals "-x --exclude .zfs --color dark $tmp/media" "$tmp/args"
   rm -rf "$tmp"
@@ -78,7 +78,19 @@ test_one_filesystem_flag_can_be_disabled() {
   NCDU_BIN="$tmp/ncdu-stub" NCDU_STUB_OUTPUT="$tmp/args" NCDU_PATH="$tmp/scan" \
     NCDU_ONE_FILESYSTEM=false "$ENTRYPOINT"
 
-  assert_file_equals "$tmp/scan" "$tmp/args"
+  assert_file_equals "--exclude .zfs $tmp/scan" "$tmp/args"
+  rm -rf "$tmp"
+}
+
+test_zfs_snapshot_exclusion_can_be_disabled() {
+  tmp=$(mktemp -d)
+  mkdir "$tmp/scan"
+  make_ncdu_stub "$tmp"
+
+  NCDU_BIN="$tmp/ncdu-stub" NCDU_STUB_OUTPUT="$tmp/args" NCDU_PATH="$tmp/scan" \
+    NCDU_EXCLUDE_ZFS=false "$ENTRYPOINT"
+
+  assert_file_equals "-x $tmp/scan" "$tmp/args"
   rm -rf "$tmp"
 }
 
@@ -128,6 +140,7 @@ test_missing_scan_path_fails_before_ncdu_runs() {
 test_default_scans_mnt_with_one_filesystem_flag
 test_path_argument_overrides_default_path_and_preserves_options
 test_one_filesystem_flag_can_be_disabled
+test_zfs_snapshot_exclusion_can_be_disabled
 test_command_passthrough_allows_shell_access
 test_version_reports_environment_version
 test_sleep_command_passthrough_supports_truenas_command_fields

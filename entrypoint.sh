@@ -14,6 +14,7 @@ Usage:
 Environment:
   NCDU_PATH=/mnt              Default scan path when SCAN_PATH is omitted.
   NCDU_ONE_FILESYSTEM=true    Add ncdu -x so scans stay on one filesystem.
+  NCDU_EXCLUDE_ZFS=true       Exclude .zfs snapshot directories from scans.
   NCDU_BIN=ncdu               Override ncdu binary, mainly for tests.
   TTYD_PORT=7681              Web terminal port for "truenas-ncdu web".
   TTYD_USER=admin             Web terminal username when TTYD_PASSWORD is set.
@@ -108,12 +109,24 @@ validate_scan_path "$scan_path"
 
 ncdu_bin=${NCDU_BIN:-ncdu}
 
-case "${NCDU_ONE_FILESYSTEM:-true}" in
+case "${NCDU_EXCLUDE_ZFS:-true}" in
   true|TRUE|1|yes|YES|on|ON)
-    exec "$ncdu_bin" -x "$@" "$scan_path"
+    set -- --exclude .zfs "$@"
     ;;
   false|FALSE|0|no|NO|off|OFF)
-    exec "$ncdu_bin" "$@" "$scan_path"
+    ;;
+  *)
+    printf 'truenas-ncdu: invalid NCDU_EXCLUDE_ZFS value: %s\n' "$NCDU_EXCLUDE_ZFS" >&2
+    printf 'truenas-ncdu: use true or false\n' >&2
+    exit 64
+    ;;
+esac
+
+case "${NCDU_ONE_FILESYSTEM:-true}" in
+  true|TRUE|1|yes|YES|on|ON)
+    set -- -x "$@"
+    ;;
+  false|FALSE|0|no|NO|off|OFF)
     ;;
   *)
     printf 'truenas-ncdu: invalid NCDU_ONE_FILESYSTEM value: %s\n' "$NCDU_ONE_FILESYSTEM" >&2
@@ -121,3 +134,5 @@ case "${NCDU_ONE_FILESYSTEM:-true}" in
     exit 64
     ;;
 esac
+
+exec "$ncdu_bin" "$@" "$scan_path"
