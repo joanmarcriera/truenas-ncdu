@@ -234,3 +234,8 @@ The tests cover the shell entrypoint and build the Docker image when Docker is a
 - [TrueNAS 25.04 Apps UI reference](https://www.truenas.com/docs/scale/25.04/scaleuireference/apps/)
 - [TrueNAS 25.04 Custom App screens](https://www.truenas.com/docs/scale/25.04/scaleuireference/apps/installcustomappscreens/)
 - [TrueNAS Apps Market: Installing Custom Apps](https://apps.truenas.com/managing-apps/installing-custom-apps/)
+
+<!-- vikunja-tracking -->
+## Tracking
+
+Vikunja project **48 · HomeLab — documentation & hygiene backlog** — https://familia.riera.co.uk/projects/48
