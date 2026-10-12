@@ -238,4 +238,4 @@ The tests cover the shell entrypoint and build the Docker image when Docker is a
 <!-- vikunja-tracking -->
 ## Tracking
 
-Vikunja project **48 · HomeLab — documentation & hygiene backlog** — https://familia.riera.co.uk/projects/48
+Vikunja project **45 · HomeLab** — https://familia.riera.co.uk/projects/45
