@@ -9,7 +9,9 @@ Usage:
   truenas-ncdu [SCAN_PATH] [NCDU_OPTIONS...]
   truenas-ncdu web
   truenas-ncdu --help-container
-  truenas-ncdu COMMAND [ARGS...]
+  truenas-ncdu --version
+  truenas-ncdu sh|bash|sleep|tail|cat|ncdu [ARGS...]
+  truenas-ncdu -- COMMAND [ARGS...]
 
 Environment:
   NCDU_PATH=/mnt              Default scan path when SCAN_PATH is omitted.
@@ -23,7 +25,7 @@ Environment:
 Examples:
   truenas-ncdu
   truenas-ncdu web
-  truenas-ncdu /mnt/tank/media --exclude .zfs
+  truenas-ncdu /mnt/tank/media --color dark
   truenas-ncdu sleep infinity
   truenas-ncdu sh
 HELP
