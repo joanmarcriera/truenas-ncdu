@@ -120,7 +120,7 @@ test_web_mode_starts_tmux_session_and_ttyd() {
 
   assert_file_equals "has-session -t truenas-ncdu
 new-session -d -s truenas-ncdu /usr/local/bin/truenas-ncdu" "$tmp/tmux-args"
-  assert_file_equals "--port 7681 --writable --credential admin:secret sh -lc exec $tmp/tmux-stub attach-session -t truenas-ncdu" "$tmp/ttyd-args"
+  assert_file_equals "--port 7681 --writable --credential admin:secret sh -lc exec $tmp/tmux-stub new-session -A -s truenas-ncdu /usr/local/bin/truenas-ncdu" "$tmp/ttyd-args"
   rm -rf "$tmp"
 }
 

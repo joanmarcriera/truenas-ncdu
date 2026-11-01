@@ -65,7 +65,9 @@ start_web_tui() {
     printf 'truenas-ncdu: warning: TTYD_PASSWORD is not set; web terminal has no login prompt\n' >&2
   fi
 
-  exec "$ttyd_bin" "$@" sh -lc "exec $tmux_bin attach-session -t $session"
+  # new-session -A attaches to the running scan, or starts a fresh one if
+  # ncdu was quit (tmux ends the session when its command exits).
+  exec "$ttyd_bin" "$@" sh -lc "exec $tmux_bin new-session -A -s $session $ncdu_cmd"
 }
 
 if [ "${1:-}" = "--help-container" ] || [ "${1:-}" = "help" ]; then
