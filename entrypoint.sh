@@ -9,7 +9,9 @@ Usage:
   truenas-ncdu [SCAN_PATH] [NCDU_OPTIONS...]
   truenas-ncdu web
   truenas-ncdu --help-container
-  truenas-ncdu COMMAND [ARGS...]
+  truenas-ncdu --version
+  truenas-ncdu sh|bash|sleep|tail|cat|ncdu [ARGS...]
+  truenas-ncdu -- COMMAND [ARGS...]
 
 Environment:
   NCDU_PATH=/mnt              Default scan path when SCAN_PATH is omitted.
@@ -23,7 +25,7 @@ Environment:
 Examples:
   truenas-ncdu
   truenas-ncdu web
-  truenas-ncdu /mnt/tank/media --exclude .zfs
+  truenas-ncdu /mnt/tank/media --color dark
   truenas-ncdu sleep infinity
   truenas-ncdu sh
 HELP
@@ -65,7 +67,9 @@ start_web_tui() {
     printf 'truenas-ncdu: warning: TTYD_PASSWORD is not set; web terminal has no login prompt\n' >&2
   fi
 
-  exec "$ttyd_bin" "$@" sh -lc "exec $tmux_bin attach-session -t $session"
+  # new-session -A attaches to the running scan, or starts a fresh one if
+  # ncdu was quit (tmux ends the session when its command exits).
+  exec "$ttyd_bin" "$@" sh -lc "exec $tmux_bin new-session -A -s $session $ncdu_cmd"
 }
 
 if [ "${1:-}" = "--help-container" ] || [ "${1:-}" = "help" ]; then
