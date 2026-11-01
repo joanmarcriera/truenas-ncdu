@@ -28,7 +28,7 @@ Direct Docker commands are shown in the Makefile and README.md.
 ## Layout
 
 ```
-entrypoint.sh                   # Main entry point: 138 lines, all logic here
+entrypoint.sh                   # Main entry point, all logic here
 Dockerfile                      # Alpine 3.22 + ncdu/tini/tmux/ttyd
 Makefile                        # Build/test/run targets with sensible defaults
 scripts/test.sh                 # Runs entrypoint linting, unit tests, Docker build
@@ -59,7 +59,7 @@ docs/                           # TrueNAS-specific setup, ZFS snapshots, publish
 1. Starts a persistent `tmux` session running `ncdu` (detached).
 2. Serves that session via `ttyd` browser terminal on port 7681.
 3. Requires TTYD_PASSWORD for login (recommended; unset = no auth).
-4. Reattach with `truenas-ncdu` command inside the browser terminal to restart scan.
+4. Each browser connection runs `tmux new-session -A`: it attaches to the running scan, or starts a new one if ncdu was quit (tmux ends the session when ncdu exits). Press `r` in ncdu to rescan a directory.
 
 **Entrypoint logic**:
 - `--help-container` / `help`: Show usage (same as entrypoint.sh header).
@@ -71,7 +71,7 @@ docs/                           # TrueNAS-specific setup, ZFS snapshots, publish
 
 ## Gotchas
 
-1. **Web mode defaults to startup**: Dockerfile `CMD ["web"]` starts browser terminal by default. If you want CLI mode, override: `docker run ... --entrypoint ... /mnt`.
+1. **Web mode defaults to startup**: Dockerfile `CMD ["web"]` starts browser terminal by default. For CLI mode, pass a path as the command: `docker run ... image /mnt`.
 
 2. **ZFS snapshot size inflation**: If Time Machine or other ZFS-backed datasets report impossibly large sizes, check `NCDU_EXCLUDE_ZFS=true` (default) and see `docs/time-machine-zfs-snapshots.md`. Visible `.zfs/snapshot` trees aren't live files.
 
@@ -79,9 +79,9 @@ docs/                           # TrueNAS-specific setup, ZFS snapshots, publish
 
 4. **Mount paths must be readable**: ACL issues on the dataset may block the scan. Test with a simple `ls` from the container first.
 
-5. **tmux session persists**: Stopping the container will kill `ttyd` but not the tmux session if you used `docker exec ... sh`. Always use `docker stop` or run with `--rm`.
+5. **Deletion is only blocked by the mount**: ncdu can delete with `d` and open a root shell with `b`. The image does not pass `--disable-delete`/`-r`, so keep host mounts `:ro`.
 
-6. **NCDU_EXCLUDE_ZFS logic**: Environment variable accepts true/false/1/0/yes/no/on/off (case-insensitive). Invalid values exit with code 64.
+6. **NCDU_EXCLUDE_ZFS logic**: Environment variable accepts true/false/1/0/yes/no/on/off in all lower or all upper case (`True` is rejected). Invalid values exit with code 64.
 
 ## Versioning & Publishing
 
