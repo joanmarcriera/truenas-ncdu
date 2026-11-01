@@ -6,7 +6,7 @@ TrueNAS SCALE does not ship `ncdu` on the host appliance. This repository packag
 
 ## What This Provides
 
-- Alpine-based container with `ncdu` and `tini`.
+- Alpine-based container with `ncdu`, `tini`, `tmux` and `ttyd`.
 - Safe default scan path: `/mnt`.
 - `ncdu -x` enabled by default to avoid crossing filesystem boundaries.
 - `.zfs` snapshot directories excluded by default so ZFS snapshots do not inflate normal folder totals.
@@ -17,7 +17,7 @@ TrueNAS SCALE does not ship `ncdu` on the host appliance. This repository packag
 
 ## Quick Use
 
-Run this from a TrueNAS SCALE shell:
+You need TrueNAS SCALE 24.10 or later, where apps run on Docker and the `docker` command exists on the host. Run this from a TrueNAS SCALE shell as root (prefix it with `sudo` if you are logged in as an admin user):
 
 ```bash
 docker run --rm -it \
@@ -47,6 +47,10 @@ docker run --rm -it \
 
 The `/mnt` host mount is read-only, so this mode is for inspection rather than deletion.
 
+Keep the `:ro` on every mount. `ncdu` can delete files and folders with `d`, and the read-only mount is the only thing that stops it: the image does not disable deletion inside `ncdu`.
+
+Without an explicit path or command, the image starts web mode (see below), not a CLI scan. Pass a path such as `/mnt` to get the interactive scan in your terminal.
+
 ## Build Locally
 
 ```bash
@@ -58,8 +62,10 @@ Or without `make`:
 
 ```bash
 docker build -t truenas-ncdu:dev .
-docker run --rm -it -v /mnt:/mnt:ro truenas-ncdu:dev
+docker run --rm -it -v /mnt:/mnt:ro truenas-ncdu:dev /mnt
 ```
+
+`make web SCAN_PATH=/mnt` runs the local image in web mode with the password `change-me`.
 
 ## TrueNAS SCALE Web App Setup
 
@@ -133,11 +139,9 @@ Use read-only mounts for normal inspection. If you want to scan multiple dataset
 http://<truenas-ip>:7681
 ```
 
-Log in with `TTYD_USER` and `TTYD_PASSWORD`. The browser attaches to the running `ncdu` TUI. To restart the scan from inside the browser terminal, press `q` to quit `ncdu`, then run:
+Log in with `TTYD_USER` and `TTYD_PASSWORD`. The browser attaches to the running `ncdu` TUI. Press `r` in `ncdu` to rescan the directory you are in. To start a full scan again, press `q` to quit `ncdu`, then reconnect or reload the page; a new scan of `NCDU_PATH` starts.
 
-```bash
-truenas-ncdu
-```
+Anyone who can log in gets the `ncdu` session, and `ncdu` can open a shell with `b`. That shell runs as root inside the container, with the same read-only mounts. Do not leave `TTYD_PASSWORD` empty on a shared network.
 
 If the app shell shows permission errors, check the dataset ACL for the mounted path and make sure the app user can read and traverse the dataset. The mount should still stay read-only unless you intentionally want delete support from inside `ncdu`.
 
@@ -188,11 +192,11 @@ Add this GitHub repository secret:
 
 - `DOCKERHUB_TOKEN`
 
-Then run the workflow manually. To tag a release in git:
+Then run the workflow manually. It pushes `latest` and `git-<sha>` only. The version tag used above (`0.2.2`, from `TRUENAS_NCDU_VERSION` in the `Dockerfile`) is not created by the workflow; push it by hand as described in the publish doc. To tag a release in git:
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.2.2
+git push origin v0.2.2
 ```
 
 More detail is in [docs/dockerhub-publish.md](docs/dockerhub-publish.md).
@@ -201,7 +205,14 @@ More detail is in [docs/dockerhub-publish.md](docs/dockerhub-publish.md).
 
 ```bash
 truenas-ncdu [SCAN_PATH] [NCDU_OPTIONS...]
+truenas-ncdu web
+truenas-ncdu --help-container
+truenas-ncdu --version
+truenas-ncdu sh|bash|sleep|tail|cat|ncdu [ARGS...]
+truenas-ncdu -- COMMAND [ARGS...]
 ```
+
+Anything after the scan path goes to `ncdu`. Note that `--help` is passed to `ncdu` and shows its help; use `--help-container` for this image's usage text.
 
 Environment variables:
 
@@ -209,6 +220,11 @@ Environment variables:
 - `NCDU_ONE_FILESYSTEM`: `true` or `false`. Defaults to `true`.
 - `NCDU_EXCLUDE_ZFS`: `true` or `false`. Defaults to `true`; excludes `.zfs` snapshot directories.
 - `NCDU_BIN`: override the binary, mainly for tests.
+- `TTYD_PORT`: web terminal port inside the container. Defaults to `7681`.
+- `TTYD_USER`: web terminal username. Defaults to `admin`.
+- `TTYD_PASSWORD`: web terminal password. Empty means no login prompt.
+
+The two `NCDU_*` switches also accept `1`/`0`, `yes`/`no` and `on`/`off`, in all lower case or all upper case. Anything else, including `True`, stops the container with exit code 64.
 
 Examples:
 
@@ -224,10 +240,10 @@ docker run --rm -p 7681:7681 -v /mnt:/mnt:ro -e TTYD_PASSWORD=change-me docker.i
 ## Development
 
 ```bash
-sh scripts/test.sh
+make test
 ```
 
-The tests cover the shell entrypoint and build the Docker image when Docker is available.
+This runs `sh scripts/test.sh`. The tests cover the shell entrypoint and build the Docker image when Docker is available.
 
 ## References
 
