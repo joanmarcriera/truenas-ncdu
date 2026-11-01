@@ -243,7 +243,7 @@ docker run --rm -p 7681:7681 -v /mnt:/mnt:ro -e TTYD_PASSWORD=change-me docker.i
 make test
 ```
 
-This runs `sh scripts/test.sh`. The tests cover the shell entrypoint and build the Docker image when Docker is available.
+This runs `sh scripts/test.sh`. The tests cover the shell entrypoint, check that this README still matches the usage text and image version, and build the Docker image when Docker is available.
 
 ## References
 

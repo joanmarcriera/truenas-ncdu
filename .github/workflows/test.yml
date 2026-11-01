@@ -1,0 +1,31 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check shell syntax
+        run: |
+          for f in entrypoint.sh scripts/*.sh tests/*.sh; do
+            sh -n "$f"
+          done
+
+      - name: Run shellcheck
+        run: |
+          command -v shellcheck >/dev/null || sudo apt-get install -y shellcheck
+          shellcheck entrypoint.sh scripts/*.sh tests/*.sh
+
+      - name: Check README against usage text
+        run: sh tests/readme_contract_test.sh
