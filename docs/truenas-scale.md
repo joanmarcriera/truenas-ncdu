@@ -44,7 +44,8 @@ The image defaults to browser terminal mode. The Compose examples do not need a 
 
 ```yaml
 ports:
-  - "7681:7681"
+  # Loopback only; put a TLS reverse proxy in front for remote use.
+  - "127.0.0.1:7681:7681"
 ```
 
 The container starts a detached `tmux` session running `ncdu`, then serves it through `ttyd`. Open:
@@ -53,7 +54,7 @@ The container starts a detached `tmux` session running `ncdu`, then serves it th
 http://<truenas-ip>:7681
 ```
 
-Set `TTYD_PASSWORD` in the app environment before exposing the port on a shared network.
+Set `TTYD_PASSWORD` in the app environment. Web mode exits with code 64 if it is empty or a placeholder such as `changeme`; set `TTYD_ALLOW_NO_AUTH=true` only if you deliberately want no login prompt.
 
 For normal storage inspection, keep `NCDU_EXCLUDE_ZFS=true`. ZFS exposes snapshots through `.zfs/snapshot` when snapshot browsing is visible, and disk-usage tools can otherwise add those historical views to the live dataset total.
 

@@ -14,9 +14,15 @@ services:
       NCDU_ONE_FILESYSTEM: "true"
       NCDU_EXCLUDE_ZFS: "true"
       TTYD_USER: admin
-      TTYD_PASSWORD: change-this-password
+      # Required: web mode exits with code 64 if this is empty or a
+      # placeholder. Export TTYD_PASSWORD before "docker compose up", or
+      # replace this value with your own password when pasting into
+      # TrueNAS "Install via YAML". Never commit a real password.
+      TTYD_PASSWORD: ${TTYD_PASSWORD:?set a password}
     ports:
-      - "7681:7681"
+      # Loopback only. Put a TLS reverse proxy in front for remote use;
+      # ttyd itself serves plain HTTP.
+      - "127.0.0.1:7681:7681"
     volumes:
       - type: bind
         source: /mnt/BigDisk
