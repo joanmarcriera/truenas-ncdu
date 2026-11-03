@@ -58,7 +58,7 @@ docs/                           # TrueNAS-specific setup, ZFS snapshots, publish
 **Web mode** (`truenas-ncdu web`):
 1. Starts a persistent `tmux` session running `ncdu` (detached).
 2. Serves that session via `ttyd` browser terminal on port 7681.
-3. Requires TTYD_PASSWORD for login (recommended; unset = no auth).
+3. Requires a real TTYD_PASSWORD; empty or placeholder values exit with code 64 unless TTYD_ALLOW_NO_AUTH=true.
 4. Reattach with `truenas-ncdu` command inside the browser terminal to restart scan.
 
 **Entrypoint logic**:
@@ -75,7 +75,7 @@ docs/                           # TrueNAS-specific setup, ZFS snapshots, publish
 
 2. **ZFS snapshot size inflation**: If Time Machine or other ZFS-backed datasets report impossibly large sizes, check `NCDU_EXCLUDE_ZFS=true` (default) and see `docs/time-machine-zfs-snapshots.md`. Visible `.zfs/snapshot` trees aren't live files.
 
-3. **TTYD_PASSWORD required for auth**: If not set, web terminal has no login prompt (warning on startup). Always set a password in production.
+3. **TTYD_PASSWORD required**: Web mode exits with code 64 if TTYD_PASSWORD is empty or a placeholder (`changeme`, `password`, ...). Set TTYD_ALLOW_NO_AUTH=true to run with no login prompt on purpose. Upgrading from 0.2.2 or earlier: set the password first, or the container crash-loops.
 
 4. **Mount paths must be readable**: ACL issues on the dataset may block the scan. Test with a simple `ls` from the container first.
 

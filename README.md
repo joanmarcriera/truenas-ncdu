@@ -10,7 +10,7 @@ TrueNAS SCALE does not ship `ncdu` on the host appliance. This repository packag
 - Safe default scan path: `/mnt`.
 - `ncdu -x` enabled by default to avoid crossing filesystem boundaries.
 - `.zfs` snapshot directories excluded by default so ZFS snapshots do not inflate normal folder totals.
-- Browser terminal mode through `ttyd`, backed by a persistent `tmux` session.
+- Browser terminal mode through `ttyd`, backed by a persistent `tmux` session, with a required login.
 - Read-only mount examples for TrueNAS datasets.
 - GitHub Actions CI and Docker Hub publishing workflow.
 - TrueNAS SCALE direct Docker and Custom App/YAML instructions.
@@ -61,6 +61,17 @@ docker build -t truenas-ncdu:dev .
 docker run --rm -it -v /mnt:/mnt:ro truenas-ncdu:dev
 ```
 
+## Upgrading
+
+Upgrading from 0.2.2 or earlier changes how web mode starts. The new image exits with code 64 if `TTYD_PASSWORD` is empty or a placeholder, so an existing app with no real password will crash-loop after the next pull.
+
+Before you pull the new image, either:
+
+- set `TTYD_PASSWORD` to a real password, or
+- set `TTYD_ALLOW_NO_AUTH=true` if the app only runs on a trusted LAN and you want no login prompt.
+
+CLI scans are not affected.
+
 ## TrueNAS SCALE Web App Setup
 
 Use this path when you want `ncdu` available in a browser as a TrueNAS app. The container starts a detached `tmux` session running `ncdu`, then serves that TUI through `ttyd` on port `7681`.
@@ -103,7 +114,7 @@ TTYD_PASSWORD=<choose-a-password>
 
 Change `NCDU_PATH` if you mount a different dataset path. Keep `NCDU_EXCLUDE_ZFS=true` for normal scans; set it to `false` only when you deliberately want to inspect ZFS snapshot contents under `.zfs/snapshot`.
 
-`TTYD_PASSWORD` is required. Version 0.2.2 and earlier started the web terminal with no password, and no login prompt, whenever `TTYD_PASSWORD` was empty. Now web mode exits with code 64 if `TTYD_PASSWORD` is empty or a placeholder such as `changeme`, `change-me` or `password`. To run without a login on purpose, for example behind a reverse proxy that does its own authentication, set `TTYD_ALLOW_NO_AUTH` to `true`.
+`TTYD_PASSWORD` is required. Version 0.2.2 and earlier started the web terminal with no password, and no login prompt, whenever `TTYD_PASSWORD` was empty. Now web mode exits with code 64 if `TTYD_PASSWORD` is empty or a placeholder (`changeme`, `change-me`, `change_me`, `password` or `change-this-password`, in any case). To run without a login on purpose, for example on a trusted LAN or behind a reverse proxy that does its own authentication, set `TTYD_ALLOW_NO_AUTH` to `true`.
 
 9. In **Network Configuration**, add a TCP port:
 
@@ -217,6 +228,10 @@ Environment variables:
 - `NCDU_ONE_FILESYSTEM`: `true` or `false`. Defaults to `true`.
 - `NCDU_EXCLUDE_ZFS`: `true` or `false`. Defaults to `true`; excludes `.zfs` snapshot directories.
 - `NCDU_BIN`: override the binary, mainly for tests.
+- `TTYD_PORT`: web terminal port. Defaults to `7681`.
+- `TTYD_USER`: web terminal username. Defaults to `admin`.
+- `TTYD_PASSWORD`: web terminal password. Required for web mode; empty or placeholder values exit with code 64.
+- `TTYD_ALLOW_NO_AUTH`: `true` or `false`. Defaults to `false`. Set `true` to start web mode with no login prompt when `TTYD_PASSWORD` is not set.
 
 Examples:
 
