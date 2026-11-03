@@ -26,8 +26,8 @@ web:
 		--tmpfs /tmp:rw,noexec,nosuid,size=64m \
 		--cap-drop ALL \
 		--security-opt no-new-privileges \
-		-p 7681:7681 \
-		-e TTYD_PASSWORD=change-me \
+		-p 127.0.0.1:7681:7681 \
+		-e TTYD_PASSWORD \
 		-v $(SCAN_PATH):/mnt:ro \
 		$(IMAGE):$(TAG)
 

@@ -10,7 +10,7 @@ TrueNAS SCALE does not ship `ncdu` on the host appliance. This repository packag
 - Safe default scan path: `/mnt`.
 - `ncdu -x` enabled by default to avoid crossing filesystem boundaries.
 - `.zfs` snapshot directories excluded by default so ZFS snapshots do not inflate normal folder totals.
-- Browser terminal mode through `ttyd`, backed by a persistent `tmux` session.
+- Browser terminal mode through `ttyd`, backed by a persistent `tmux` session, with a required login.
 - Read-only mount examples for TrueNAS datasets.
 - GitHub Actions CI and Docker Hub publishing workflow.
 - TrueNAS SCALE direct Docker and Custom App/YAML instructions.
@@ -61,6 +61,17 @@ docker build -t truenas-ncdu:dev .
 docker run --rm -it -v /mnt:/mnt:ro truenas-ncdu:dev
 ```
 
+## Upgrading
+
+Upgrading from 0.2.2 or earlier changes how web mode starts. The new image exits with code 64 if `TTYD_PASSWORD` is empty or a placeholder, so an existing app with no real password will crash-loop after the next pull.
+
+Before you pull the new image, either:
+
+- set `TTYD_PASSWORD` to a real password, or
+- set `TTYD_ALLOW_NO_AUTH=true` if the app only runs on a trusted LAN and you want no login prompt.
+
+CLI scans are not affected.
+
 ## TrueNAS SCALE Web App Setup
 
 Use this path when you want `ncdu` available in a browser as a TrueNAS app. The container starts a detached `tmux` session running `ncdu`, then serves that TUI through `ttyd` on port `7681`.
@@ -102,6 +113,8 @@ TTYD_PASSWORD=<choose-a-password>
 ```
 
 Change `NCDU_PATH` if you mount a different dataset path. Keep `NCDU_EXCLUDE_ZFS=true` for normal scans; set it to `false` only when you deliberately want to inspect ZFS snapshot contents under `.zfs/snapshot`.
+
+`TTYD_PASSWORD` is required. Version 0.2.2 and earlier started the web terminal with no password, and no login prompt, whenever `TTYD_PASSWORD` was empty. Now web mode exits with code 64 if `TTYD_PASSWORD` is empty or a placeholder (`changeme`, `change-me`, `change_me`, `password` or `change-this-password`, in any case). To run without a login on purpose, for example on a trusted LAN or behind a reverse proxy that does its own authentication, set `TTYD_ALLOW_NO_AUTH` to `true`.
 
 9. In **Network Configuration**, add a TCP port:
 
@@ -162,9 +175,15 @@ services:
       NCDU_ONE_FILESYSTEM: "true"
       NCDU_EXCLUDE_ZFS: "true"
       TTYD_USER: admin
-      TTYD_PASSWORD: change-this-password
+      # Required: web mode exits with code 64 if this is empty or a
+      # placeholder. Export TTYD_PASSWORD before "docker compose up", or
+      # replace this value with your own password when pasting into
+      # TrueNAS "Install via YAML". Never commit a real password.
+      TTYD_PASSWORD: ${TTYD_PASSWORD:?set a password}
     ports:
-      - "7681:7681"
+      # Loopback only. Put a TLS reverse proxy in front for remote use;
+      # ttyd itself serves plain HTTP.
+      - "127.0.0.1:7681:7681"
     volumes:
       - type: bind
         source: /mnt/BigDisk
@@ -174,7 +193,7 @@ services:
 
 This same YAML is available at [`examples/compose.bigdisk.yaml`](examples/compose.bigdisk.yaml). The generic `/mnt` example remains at [`examples/compose.truenas.yaml`](examples/compose.truenas.yaml).
 
-After the app starts, open `http://<truenas-ip>:7681` and log in with `admin` plus the password you configured.
+The YAML publishes port `7681` on `127.0.0.1` only, because `ttyd` serves plain HTTP and the password would cross the network unencrypted. To use it from another machine, put a TLS reverse proxy in front of it, then log in with `admin` plus the password you configured.
 
 See [docs/truenas-scale.md](docs/truenas-scale.md) for extra TrueNAS notes, including permissions and interactive terminal trade-offs.
 
@@ -209,6 +228,10 @@ Environment variables:
 - `NCDU_ONE_FILESYSTEM`: `true` or `false`. Defaults to `true`.
 - `NCDU_EXCLUDE_ZFS`: `true` or `false`. Defaults to `true`; excludes `.zfs` snapshot directories.
 - `NCDU_BIN`: override the binary, mainly for tests.
+- `TTYD_PORT`: web terminal port. Defaults to `7681`.
+- `TTYD_USER`: web terminal username. Defaults to `admin`.
+- `TTYD_PASSWORD`: web terminal password. Required for web mode; empty or placeholder values exit with code 64.
+- `TTYD_ALLOW_NO_AUTH`: `true` or `false`. Defaults to `false`. Set `true` to start web mode with no login prompt when `TTYD_PASSWORD` is not set.
 
 Examples:
 
@@ -218,7 +241,7 @@ docker run --rm -it -v /mnt:/mnt:ro -e NCDU_ONE_FILESYSTEM=false docker.io/joanm
 docker run --rm -it -v /mnt:/mnt:ro -e NCDU_EXCLUDE_ZFS=false docker.io/joanmarcriera/truenas-ncdu:latest /mnt/tank/media
 docker run --rm -it -v /mnt:/mnt:ro docker.io/joanmarcriera/truenas-ncdu:latest sh
 docker run --rm docker.io/joanmarcriera/truenas-ncdu:latest --version
-docker run --rm -p 7681:7681 -v /mnt:/mnt:ro -e TTYD_PASSWORD=change-me docker.io/joanmarcriera/truenas-ncdu:latest
+docker run --rm -p 127.0.0.1:7681:7681 -v /mnt:/mnt:ro -e TTYD_PASSWORD docker.io/joanmarcriera/truenas-ncdu:latest
 ```
 
 ## Development

@@ -18,7 +18,9 @@ Environment:
   NCDU_BIN=ncdu               Override ncdu binary, mainly for tests.
   TTYD_PORT=7681              Web terminal port for "truenas-ncdu web".
   TTYD_USER=admin             Web terminal username when TTYD_PASSWORD is set.
-  TTYD_PASSWORD=              Optional web terminal password.
+  TTYD_PASSWORD=              Web terminal password. Required for "web";
+                              empty or placeholder values exit with code 64.
+  TTYD_ALLOW_NO_AUTH=false    Set true to start "web" with no login prompt.
 
 Examples:
   truenas-ncdu
@@ -43,7 +45,40 @@ validate_scan_path() {
   fi
 }
 
+require_web_auth() {
+  case "${TTYD_ALLOW_NO_AUTH:-false}" in
+    true|TRUE|1|yes|YES|on|ON)
+      return 0
+      ;;
+    false|FALSE|0|no|NO|off|OFF)
+      ;;
+    *)
+      printf 'truenas-ncdu: invalid TTYD_ALLOW_NO_AUTH value: %s\n' "$TTYD_ALLOW_NO_AUTH" >&2
+      printf 'truenas-ncdu: use true or false\n' >&2
+      exit 64
+      ;;
+  esac
+
+  if [ -z "${TTYD_PASSWORD:-}" ]; then
+    printf 'truenas-ncdu: TTYD_PASSWORD is not set; refusing to start the web terminal without a login\n' >&2
+  else
+    password_lower=$(printf '%s' "$TTYD_PASSWORD" | tr '[:upper:]' '[:lower:]')
+    case "$password_lower" in
+      changeme|change-me|change_me|password|change-this-password)
+        printf 'truenas-ncdu: TTYD_PASSWORD is a placeholder value; refusing to start the web terminal\n' >&2
+        ;;
+      *)
+        return 0
+        ;;
+    esac
+  fi
+
+  printf 'truenas-ncdu: set TTYD_PASSWORD to a real password, or set TTYD_ALLOW_NO_AUTH=true to run without a login prompt\n' >&2
+  exit 64
+}
+
 start_web_tui() {
+  require_web_auth
   scan_path=${NCDU_PATH:-/mnt}
   validate_scan_path "$scan_path"
 

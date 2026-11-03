@@ -10,6 +10,7 @@ sh "$ROOT_DIR/tests/dockerfile_contract_test.sh"
 if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   DOCKER_PLATFORM=${DOCKER_PLATFORM:-linux/amd64}
   docker build --pull=false --platform "$DOCKER_PLATFORM" -t truenas-ncdu:test "$ROOT_DIR"
+  sh "$ROOT_DIR/tests/image_smoke_test.sh" truenas-ncdu:test
 else
   printf 'skip - docker daemon not available; container build was not run\n'
 fi
